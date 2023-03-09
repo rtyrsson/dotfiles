@@ -1,0 +1,183 @@
+set hidden
+set noerrorbells
+set nocompatible              " be iMproved, required
+filetype off                  " required
+set noswapfile
+set nobackup
+set undodir=~/.vim/undodir
+set undofile
+set viminfo+=n~/.vim/viminfo
+set incsearch
+set hlsearch
+set encoding=utf-8
+set nu
+set relativenumber
+set updatetime=50
+set noshowmode
+set scrolloff=8
+set splitbelow splitright
+set rtp+=~/.vim/bundle/Vundle.vim
+set laststatus=2
+set showtabline=2
+set backspace=indent,eol,start
+
+let mapleader = " "
+
+call plug#begin()
+Plug 'gmarik/Vundle.vim'
+Plug 'itchyny/lightline.vim'
+Plug 'mengelbrecht/lightline-bufferline'
+"Plug 'joshdick/onedark.vim'
+Plug 'arcticicestudio/nord-vim'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+Plug 'vim-scripts/indentpython.vim'
+Plug 'davidhalter/jedi-vim'
+Plug 'Raimondi/delimitMate'
+Plug 'psf/black', { 'branch': 'stable' }
+Plug 'ervandew/supertab'
+Plug 'jpalardy/vim-slime'
+Plug 'sheerun/vim-polyglot'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+call plug#end()
+
+filetype plugin indent on
+
+" if &term == "screen"
+"   set t_Co=256
+" endif
+"let g:onedark_color_overrides = {"white": { "gui": "#EEEEEE", "cterm": "255","cterm16": "7" }, "gutter_fg_grey": { "gui": "#8A8A8A","cterm": "245" }, "comment_grey": { "gui": "#8A8A8A","cterm": "245" }}
+"colorscheme onedark
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+if (has("termguicolors"))
+  set termguicolors
+endif
+
+colorscheme nord
+
+let g:rehash256 = 1
+let g:lightline = {
+      \ 'colorscheme': 'nord',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ], [ 'readonly', 'filename', 'modified' ] ]
+      \ },
+      \ 'tabline': {
+      \   'left': [ ['buffers'] ],
+      \   'right': [ [] ]
+      \ },
+      \ 'component_expand': {
+      \   'buffers': 'lightline#bufferline#buffers'
+      \ },
+      \ 'component_type': {
+      \   'buffers': 'tabsel'
+      \ }
+      \ }
+let g:slime_target = "vimterminal"
+let g:slime_python_ipython = 1
+let g:black_linelength=79
+let g:jedi#use_splits_not_buffers = "right"
+let g:jedi#popup_on_dot = 0
+let g:jedi#show_call_signatures = "2"
+let g:netrw_browse_split = 4
+let g:netrw_liststyle = 3
+let g:netrw_banner = 0
+let g:netrw_winsize = 20
+
+function! ToggleFoldingSyntax()
+  if &foldmethod == "syntax"
+    set foldmethod=manual
+  elseif &foldmethod == "manual"
+    set foldmethod=syntax
+  endif
+endfunction
+nnoremap <leader>f :call ToggleFoldingSyntax()<cr>
+
+function! OpenToRight()
+  :normal v
+  let g:path=expand('%:p')
+  :q!
+  execute 'belowright vnew' g:path
+  :normal <C-l>
+endfunction
+
+function! OpenBelow()
+  :normal v
+  let g:path=expand('%:p')
+  :q!
+  execute 'belowright new' g:path
+  :normal <C-l>
+endfunction
+
+function! NetrwMappings()
+  noremap <buffer> <C-l> <C-w>l
+  noremap <buffer> V :call OpenToRight()<CR>
+  noremap <buffer> H :call OpenBelow()<CR>
+endfunction
+
+noremap <silent> <C-n> :call ToggleNetrw()<CR>
+let g:NetrwIsOpen=0
+
+function! ToggleNetrw()
+  if g:NetrwIsOpen
+    let i = bufnr("$")
+    while (i >= 1)
+      if (getbufvar(i, "&filetype") == "netrw")
+        silent exe "bwipeout " . i
+      endif
+      let i-=1
+    endwhile
+    let g:NetrwIsOpen=0
+  else
+    let g:NetrwIsOpen=1
+    silent Lexplore
+  endif
+endfunction
+
+augroup netrw_mappings
+  autocmd!
+  autocmd filetype netrw call NetrwMappings()
+augroup END
+
+
+let python_highlight_all=1
+au FileType python
+			\ set tabstop=4 |
+			\ set softtabstop=4 |
+			\ set shiftwidth=4 |
+			\ set smarttab	|
+      \ set expandtab |
+      \ set colorcolumn=80|
+			\ set autoindent |
+			\ set fileformat=unix 
+
+
+"
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" other key bindings
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nnoremap ü <C-]>
+nnoremap Ü <C-O>
+imap <C-j> <C-g>g
+
+nnoremap <F9> :Black<CR>
+" Press F4 to toggle highlighting on/off, and show current value.
+noremap <F4> :set hlsearch! hlsearch?<CR>
+
+nnoremap <leader>h :wincmd h<CR>
+nnoremap <leader>j :wincmd j<CR>
+nnoremap <leader>k :wincmd k<CR>
+nnoremap <leader>l :wincmd l<CR>
+nnoremap <F10> :%!python -m json.tool<CR>
+nnoremap <silent> <C-f> :Files<CR>
+
+noremap <Up> <Nop>
+noremap <Down> <Nop>
+noremap <Left> <Nop>
+noremap <Right> <Nop>
+inoremap <Up> <Nop>
+inoremap <Down> <Nop>
+inoremap <Left> <Nop>
+inoremap <Right> <Nop>
